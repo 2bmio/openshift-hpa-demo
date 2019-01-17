@@ -81,7 +81,7 @@ objects:
       type: ImageChange
 - apiVersion: v1
   kind: Service
-    metadata:
+  metadata:
     labels:
       app: ${APP_NAME}
     name: ${APP_NAME}
