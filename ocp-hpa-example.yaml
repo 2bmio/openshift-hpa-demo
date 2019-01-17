@@ -79,17 +79,33 @@ objects:
           kind: ImageStreamTag
           name: ${APP_NAME}:latest
       type: ImageChange
+- apiVersion: v1
+  kind: Service
+    metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    sessionAffinity: None
+    type: ClusterIP
 - apiVersion: autoscaling/v1
   kind: HorizontalPodAutoscaler
   metadata:
-    name: hpa-app
+    name: ${APP_NAME}
   spec:
     maxReplicas: 10
     minReplicas: 1
     scaleTargetRef:
       apiVersion: apps.openshift.io/v1
       kind: DeploymentConfig
-      name: hpa-app
+      name: ${APP_NAME}
     targetCPUUtilizationPercentage: 50
 parameters:
 - name: APP_NAME
