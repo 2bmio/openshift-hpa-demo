@@ -62,6 +62,13 @@ objects:
                 fieldPath: metadata.namespace
           imagePullPolicy: Always
           name: ${APP_NAME}
+          ports:
+            - containerPort: 8080
+              name: web
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
     triggers:
     - type: ConfigChange
     - imageChangeParams:
@@ -72,6 +79,18 @@ objects:
           kind: ImageStreamTag
           name: ${APP_NAME}:latest
       type: ImageChange
+- apiVersion: autoscaling/v1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: hpa-app
+  spec:
+    maxReplicas: 10
+    minReplicas: 1
+    scaleTargetRef:
+      apiVersion: apps.openshift.io/v1
+      kind: DeploymentConfig
+      name: hpa-app
+    targetCPUUtilizationPercentage: 50
 parameters:
 - name: APP_NAME
   value: hpa-app
