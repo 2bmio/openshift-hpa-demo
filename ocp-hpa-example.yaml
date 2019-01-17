@@ -1,0 +1,77 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: hpa-app
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${APP_NAME}
+    labels:
+      app: ${APP_NAME}
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APP_NAME}:latest
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/georgegoh/ocp-hpa-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: DockerImage
+          name: openshift/php-56-centos7
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - type: ConfigChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    template:
+      metadata:
+        labels:
+          app: ${APP_NAME}
+          deploymentconfig: ${APP_NAME}
+      spec:
+        containers:
+        - env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          imagePullPolicy: Always
+          name: ${APP_NAME}
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_NAME}:latest
+      type: ImageChange
+parameters:
+- name: APP_NAME
+  value: hpa-app
