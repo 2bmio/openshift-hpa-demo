@@ -23,4 +23,4 @@ https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkth
 
 To install *metrics-server*, run the following on bastion:
 
-```ansible-playbook -i <INVENTORY_FILE> /usr/share/ansible/openshift-ansible/playbooks/metrics-server/config.yml -e openshift_metrics_server_install=true
+```ansible-playbook -i <INVENTORY_FILE> /usr/share/ansible/openshift-ansible/playbooks/metrics-server/config.yml -e openshift_metrics_server_install=true```
